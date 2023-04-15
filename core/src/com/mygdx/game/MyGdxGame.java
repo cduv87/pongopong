@@ -2,16 +2,17 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Input;
 
-import java.time.Clock;
 import java.util.Random;
 
 public class MyGdxGame extends ApplicationAdapter {
@@ -27,10 +28,14 @@ public class MyGdxGame extends ApplicationAdapter {
 
 	private static final int GAME_HEIGHT = 480;
 	private static final int BUTTON_HEIGHT = 40;
-
 	private static final float INITIAL_SPEED = 140;
 
-	private Rectangle resetButton, creditsButton, spaceButton, quitButton;
+	//message
+	private float messageDisplayTime = 0;
+	private GlyphLayout glyphLayout;
+	private Color violet = new Color(0.93f, 0.51f, 0.93f, 1);
+
+	private Rectangle resetButton, touchesButton, spaceButton, quitButton;
 
 	@Override
 	public void create() {
@@ -48,7 +53,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		ballVelocity = getRandomVelocity(INITIAL_SPEED);
 
 		resetButton = new Rectangle(0, 0, 200, BUTTON_HEIGHT);
-		creditsButton = new Rectangle(200, 0, 200, BUTTON_HEIGHT);
+		touchesButton = new Rectangle(200, 0, 200, BUTTON_HEIGHT);
 		spaceButton = new Rectangle(400, 0, 200, BUTTON_HEIGHT);
 		quitButton = new Rectangle(600, 0, 200, BUTTON_HEIGHT);
 
@@ -78,19 +83,19 @@ public class MyGdxGame extends ApplicationAdapter {
 
 			}
 
-			if (Gdx.input.isKeyPressed(Input.Keys.W) && paddle1.y + paddle1.height < GAME_HEIGHT) {
+			if (Gdx.input.isKeyPressed(Input.Keys.W) && paddle1.y + paddle1.height < GAME_HEIGHT - 10) {
 				paddle1.y += 8;
 			}
 
-			if (Gdx.input.isKeyPressed(Input.Keys.S) && paddle1.y > 0) {
+			if (Gdx.input.isKeyPressed(Input.Keys.S) && paddle1.y > 50) {
 				paddle1.y -= 8;
 			}
 
-			if (Gdx.input.isKeyPressed(Input.Keys.UP) && paddle2.y + paddle2.height < GAME_HEIGHT) {
+			if (Gdx.input.isKeyPressed(Input.Keys.UP) && paddle2.y + paddle2.height < GAME_HEIGHT - 10) {
 				paddle2.y += 8;
 			}
 
-			if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && paddle2.y > 0) {
+			if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && paddle2.y > 50) {
 				paddle2.y -= 8;
 			}
 
@@ -101,6 +106,9 @@ public class MyGdxGame extends ApplicationAdapter {
 			if (ball.x > Gdx.graphics.getWidth()) {
 				ballActive = false;
 				scorePlayer2 ++;
+			}
+			if (messageDisplayTime > 0) {
+				messageDisplayTime -= Gdx.graphics.getDeltaTime();
 			}
 		}
 
@@ -121,9 +129,9 @@ public class MyGdxGame extends ApplicationAdapter {
 				scorePlayer2 = 0;
 				Gdx.app.log("InputProcessor", "Reset button clicked");
 			}
-			else if (creditsButton.contains(screenX, y)) {
-				System.out.println("Jeu créé par Clément Duval");
-				Gdx.app.log("InputProcessor", "Credits button clicked");
+			else if (touchesButton.contains(screenX, y)) {
+				messageDisplayTime = 6; // Set the message display time to 6 seconds
+				Gdx.app.log("InputProcessor", "Touches button clicked");
 			}
 			else if (spaceButton.contains(screenX, y)) {
 				// action pour le bouton dte lancement de balle
@@ -178,7 +186,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 		shapeRenderer.setColor(0.2f, 0.2f, 0.2f, 1);
 		shapeRenderer.rect(resetButton.x, resetButton.y, resetButton.width, resetButton.height);
-		shapeRenderer.rect(creditsButton.x, creditsButton.y, creditsButton.width, creditsButton.height);
+		shapeRenderer.rect(touchesButton.x, touchesButton.y, touchesButton.width, touchesButton.height);
 		shapeRenderer.rect(spaceButton.x, spaceButton.y, spaceButton.width, spaceButton.height);
 		shapeRenderer.rect(quitButton.x, quitButton.y, quitButton.width, quitButton.height);
 		shapeRenderer.end();
@@ -186,10 +194,22 @@ public class MyGdxGame extends ApplicationAdapter {
 		// dessiner le texte des boutons
 		batch.begin();
 		font.draw(batch, "Réinitialiser le jeu", resetButton.x + 20, resetButton.y + BUTTON_HEIGHT / 1.6f );
-		font.draw(batch, "Crédits", creditsButton.x + 80, creditsButton.y + BUTTON_HEIGHT / 1.6f );
+		font.draw(batch, "Touches", touchesButton.x + 80, touchesButton.y + BUTTON_HEIGHT / 1.6f );
 		font.draw(batch, "Lancer une nouvelle balle", spaceButton.x + 20, spaceButton.y + BUTTON_HEIGHT / 1.6f );
 		font.draw(batch, "Quitter le jeu", quitButton.x + 60, quitButton.y + BUTTON_HEIGHT / 1.6f );
 		batch.end();
+
+		// message des touches
+		if (messageDisplayTime > 0) {
+			batch.begin();
+			String message = "Copie de PONG produite par Clément Duval , amusez vous bien, player 1 : Z/S player 2 UP/DOWN, SPACE pour relancer la balle";
+			float messageX = 300;
+			float messageY = GAME_HEIGHT / 2;
+
+			batch.begin();
+			font.draw(batch, message, messageX, messageY);
+			batch.end();
+		}
 	}
 
 	private Vector2 getRandomVelocity(float speed) {
