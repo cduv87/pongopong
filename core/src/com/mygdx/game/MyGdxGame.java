@@ -30,10 +30,10 @@ public class MyGdxGame extends ApplicationAdapter {
 	private static final int BUTTON_HEIGHT = 40;
 	private static final float INITIAL_SPEED = 140;
 
-	//message
-	private float messageDisplayTime = 0;
-	private GlyphLayout glyphLayout;
-	private Color violet = new Color(0.93f, 0.51f, 0.93f, 1);
+	// Message
+	private boolean showMessage = false;
+	private long messageStartTime;
+	private static final long MESSAGE_DURATION = 4 * 1000; // 6 seconds
 
 	private Rectangle resetButton, touchesButton, spaceButton, quitButton;
 
@@ -70,7 +70,7 @@ public class MyGdxGame extends ApplicationAdapter {
 			ball.x += ballVelocity.x * Gdx.graphics.getDeltaTime();
 			ball.y += ballVelocity.y * Gdx.graphics.getDeltaTime();
 
-			if (ball.y <= BUTTON_HEIGHT +10 || ball.y + ball.height >= GAME_HEIGHT -10) {
+			if (ball.y <= BUTTON_HEIGHT + 10 || ball.y + ball.height >= GAME_HEIGHT - 10) {
 				ballVelocity.y = -ballVelocity.y;
 			}
 
@@ -99,16 +99,13 @@ public class MyGdxGame extends ApplicationAdapter {
 				paddle2.y -= 8;
 			}
 
-			if (ball.x + ball.width < 0 ) {
+			if (ball.x + ball.width < 0) {
 				ballActive = false;
-				scorePlayer1 ++;
+				scorePlayer1++;
 			}
 			if (ball.x > Gdx.graphics.getWidth()) {
 				ballActive = false;
-				scorePlayer2 ++;
-			}
-			if (messageDisplayTime > 0) {
-				messageDisplayTime -= Gdx.graphics.getDeltaTime();
+				scorePlayer2++;
 			}
 		}
 
@@ -128,29 +125,31 @@ public class MyGdxGame extends ApplicationAdapter {
 				scorePlayer1 = 0;
 				scorePlayer2 = 0;
 				Gdx.app.log("InputProcessor", "Reset button clicked");
-			}
-			else if (touchesButton.contains(screenX, y)) {
-				messageDisplayTime = 6; // Set the message display time to 6 seconds
+			} else if (touchesButton.contains(screenX, y)) {
+				showMessage = true;
+				messageStartTime = System.currentTimeMillis();
 				Gdx.app.log("InputProcessor", "Touches button clicked");
-			}
-			else if (spaceButton.contains(screenX, y)) {
-				// action pour le bouton dte lancement de balle
+			} else if (spaceButton.contains(screenX, y)) {
+				// action pour le bouton de lancement de balle
 				ballActive = false;
 				ball = new Rectangle(Gdx.graphics.getWidth() / 2 - 5, GAME_HEIGHT / 2 - 5, 10, 10);
 				ballVelocity = getRandomVelocity(INITIAL_SPEED);
 				ballActive = true;
 				Gdx.app.log("InputProcessor", "Launch ball button clicked");
-			}
-			else if (quitButton.contains(screenX, y)) {
+			} else if (quitButton.contains(screenX, y)) {
 				// action pour le bouton de quitter
 				Gdx.app.log("InputProcessor", "Quit button clicked");
 				Gdx.app.exit();
 			}
 		}
 
+		if (showMessage && System.currentTimeMillis() - messageStartTime > MESSAGE_DURATION) {
+			showMessage = false;
+		}
 	}
 
-	private void draw() {
+
+			private void draw() {
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 
@@ -200,13 +199,15 @@ public class MyGdxGame extends ApplicationAdapter {
 		batch.end();
 
 		// message des touches
-		if (messageDisplayTime > 0) {
+		if (showMessage) {
 			batch.begin();
-			String message = "Copie de PONG produite par Clément Duval , amusez vous bien, player 1 : Z/S player 2 UP/DOWN, SPACE pour relancer la balle";
-			float messageX = 300;
+			String message = "Copie de PONG produite par Clément Duval.\n"
+					+ "Amusez vous bien ! \n"
+					+ "player1 : Z/S \n"
+					+ "player2 UP/DOWN\n"
+					+ "SPACE pour relancer la balle";			float messageX = 300;
 			float messageY = GAME_HEIGHT / 2;
 
-			batch.begin();
 			font.draw(batch, message, messageX, messageY);
 			batch.end();
 		}
