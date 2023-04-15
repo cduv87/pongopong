@@ -28,6 +28,8 @@ public class MyGdxGame extends ApplicationAdapter {
 	private static final int GAME_HEIGHT = 480;
 	private static final int BUTTON_HEIGHT = 40;
 
+	private static final float INITIAL_SPEED = 140;
+
 	private Rectangle resetButton, creditsButton, spaceButton, quitButton;
 
 	@Override
@@ -43,7 +45,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		paddle2 = new Rectangle(770, 160, 10, 60);
 
 		ball = new Rectangle(Gdx.graphics.getWidth() / 2 - 5, GAME_HEIGHT / 2 - 5, 10, 10);
-		ballVelocity = getRandomVelocity(120);
+		ballVelocity = getRandomVelocity(INITIAL_SPEED);
 
 		resetButton = new Rectangle(0, 0, 200, BUTTON_HEIGHT);
 		creditsButton = new Rectangle(200, 0, 200, BUTTON_HEIGHT);
@@ -64,30 +66,32 @@ public class MyGdxGame extends ApplicationAdapter {
 			ball.y += ballVelocity.y * Gdx.graphics.getDeltaTime();
 
 			if (ball.y <= BUTTON_HEIGHT +10 || ball.y + ball.height >= GAME_HEIGHT -10) {
-				System.out.println("ball.y" + ball.y);
 				ballVelocity.y = -ballVelocity.y;
 			}
 
 			if (ball.overlaps(paddle1) || ball.overlaps(paddle2)) {
 				ballVelocity.x = -ballVelocity.x;
-				ballVelocity.scl(1.06f);
+				Gdx.app.log("ballVelocity beforeSCL", ballVelocity.toString());
+
+				ballVelocity.scl(1.1f);
+				Gdx.app.log("ballVelocity afterSCL", ballVelocity.toString());
 
 			}
 
 			if (Gdx.input.isKeyPressed(Input.Keys.W) && paddle1.y + paddle1.height < GAME_HEIGHT) {
-				paddle1.y += 5;
+				paddle1.y += 8;
 			}
 
 			if (Gdx.input.isKeyPressed(Input.Keys.S) && paddle1.y > 0) {
-				paddle1.y -= 5;
+				paddle1.y -= 8;
 			}
 
 			if (Gdx.input.isKeyPressed(Input.Keys.UP) && paddle2.y + paddle2.height < GAME_HEIGHT) {
-				paddle2.y += 5;
+				paddle2.y += 8;
 			}
 
 			if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && paddle2.y > 0) {
-				paddle2.y -= 5;
+				paddle2.y -= 8;
 			}
 
 			if (ball.x + ball.width < 0 ) {
@@ -104,7 +108,7 @@ public class MyGdxGame extends ApplicationAdapter {
 				&& Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 			ballActive = false;
 			ball = new Rectangle(Gdx.graphics.getWidth() / 2 - 5, GAME_HEIGHT / 2 - 5, 10, 10);
-			ballVelocity = getRandomVelocity(120);
+			ballVelocity = getRandomVelocity(INITIAL_SPEED);
 			ballActive = true;
 		}
 
@@ -125,7 +129,7 @@ public class MyGdxGame extends ApplicationAdapter {
 				// action pour le bouton dte lancement de balle
 				ballActive = false;
 				ball = new Rectangle(Gdx.graphics.getWidth() / 2 - 5, GAME_HEIGHT / 2 - 5, 10, 10);
-				ballVelocity = getRandomVelocity(120);
+				ballVelocity = getRandomVelocity(INITIAL_SPEED);
 				ballActive = true;
 				Gdx.app.log("InputProcessor", "Launch ball button clicked");
 			}
